@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI 에이전트 수족관 — 프로토타입</title>
+<meta name="description" content="여러 AI를 캐릭터로 관리하는 상주형 위젯 프로토타입">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+<div class="scrim" id="scrim"><div class="intro">
+  <h1>AI 에이전트 수족관</h1>
+  <p class="sub">여러 AI를 동시에 쓰는 사람을 위한 상주형 위젯입니다. 화면 오른쪽 끝의 작은 수조에서 누가 무엇을 하고 있는지 보고, 창 하나에서 전부 관리합니다.</p>
+  <ul>
+    <li>캐릭터에 <b>마우스를 올리면</b> 지금 하는 일과 남은 시간이 펼쳐집니다</li>
+    <li>다섯 개 능력치를 <b>셋이 동시에</b> 비교합니다</li>
+    <li>대화를 <b>다른 AI에게 넘기고</b>, 같은 질문을 <b>셋에게 동시에</b> 보냅니다</li>
+  </ul>
+  <div class="acts">
+    <button class="pbtn p1" id="goTour">가이드 투어 시작</button>
+    <button class="pbtn p2" id="goAuto">자동으로 재생</button>
+    <button class="pbtn p3" id="goFree">혼자 둘러보기</button>
+  </div>
+</div></div>
+
+<div class="topbar">
+  <b>AI 에이전트 수족관</b><span>1920 × 1200 · 위젯 100 × 700 · 데이터는 전부 예시</span>
+  <button class="tb" id="bFit" aria-pressed="true">화면 맞춤</button>
+  <button class="tb" id="bOne" aria-pressed="false">실제 크기</button>
+  <button class="tb go" id="bTour">가이드 투어</button>
+  <button class="tb" id="bAuto">자동 재생</button>
+</div>
+
+<div class="viewport" id="vp"><div class="scaler" id="sc"><div class="screen" id="screen">
+  <div class="win">
+    <div class="wbar"><i></i><i></i><i></i></div>
+    <div class="ln a"></div><div class="ln i b"></div><div class="ln i c"></div><div class="ln i2 d"></div>
+    <div class="ln i e"></div><div class="ln f"></div><div class="ln g"></div><div class="ln i b"></div>
+    <div class="ln i2 e"></div><div class="ln i d"></div><div class="ln c"></div><div class="ln i a"></div>
+    <div class="ln i2 f"></div><div class="ln b"></div><div class="ln i g"></div><div class="ln i d"></div>
+    <div class="ln e"></div><div class="ln i2 b"></div><div class="ln i c"></div>
+  </div>
+  <div class="dock"></div>
+
+  <div class="panel" id="panel"><div class="panel-in">
+    <div class="p-hd">
+      <h2>수족관</h2>
+      <p>세 서비스에 각각 접속하지 않고 이 창에서 전부 처리합니다.</p>
+      <div class="tabs" role="tablist">
+        <button class="tab" role="tab" data-pane="work" aria-selected="true">통합 작업</button>
+        <button class="tab" role="tab" data-pane="stat" aria-selected="false">스탯 비교</button>
+        <button class="tab" role="tab" data-pane="reco" aria-selected="false">자동 라우팅</button>
+        <button class="tab" role="tab" data-pane="cross" aria-selected="false">비교 분석</button>
+        <button class="tab" role="tab" data-pane="tone" aria-selected="false">말투</button>
+      </div>
+    </div>
+    <div class="p-bd">
+      <div class="pane on" id="pane-work">
+        <p class="lead">세 AI의 세션이 한 목록에 모입니다. 대화를 다른 AI에게 넘기면 지금까지의 맥락이 요약되어 함께 전달됩니다.</p>
+        <div class="wrapgrid">
+          <div id="seshList"></div>
+          <div>
+            <div class="chatbox" id="chatBox"></div>
+            <div class="handoff"><span class="lbl">이 대화 넘기기</span><span id="handoffBtns"></span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="pane" id="pane-stat">
+        <p class="lead">다섯 개 축을 셋이 나란히 비교합니다. 축마다 1위가 달라서 종합 순위는 매기지 않습니다.</p>
+        <div class="legend" id="legend"></div>
+        <div class="card cmp" id="cmpCard"></div>
+      </div>
+
+      <div class="pane" id="pane-reco">
+        <p class="lead">하려는 일을 적으면 필요한 능력 축을 판별해 담당을 정하고, 예상 소요 시간까지 계산합니다.</p>
+        <div class="rowchip" id="recoChips"></div>
+        <div class="thinking" id="recoThink">작업 유형을 분석하는 중…</div>
+        <div class="result" id="recoResult"></div>
+      </div>
+
+      <div class="pane" id="pane-cross">
+        <p class="lead">같은 프롬프트를 셋에게 한 번에 보내 답변 품질을 대조합니다. 응답 시간과 합의도가 함께 표시됩니다.</p>
+        <div class="askrow">
+          <input id="ccInput" value="결제 모듈을 직접 만들까요, 외부 서비스를 붙일까요?">
+          <button class="sendb" id="ccSend">셋에게 동시 전송</button>
+        </div>
+        <div class="cc3" id="ccGrid"></div>
+        <div id="ccVerdict"></div>
+      </div>
+
+      <div class="pane" id="pane-tone">
+        <p class="lead">같은 내용을 성격에 맞춰 다르게 읽어 줍니다. 표현만 바뀌고 사실은 건드리지 않습니다.</p>
+        <div class="rowchip" id="toneChips"></div>
+        <div class="tone" id="toneBox"></div>
+        <button class="linkbtn" id="toggleOrig">원문 그대로 보기</button>
+        <div class="orig" id="origBox"></div>
+        <div class="warn">말투 변환은 기본값이 꺼져 있습니다. 숫자·인용·코드가 포함된 답변에는 적용되지 않으며 원문은 항상 함께 보관됩니다.</div>
+      </div>
+    </div>
+  </div></div>
+
+  <div class="hov" id="hov"><div class="hov-in" id="hovIn"></div></div>
+
+  <div class="tank hint" id="tank"><div class="tank-in">
+    <div class="caustic"></div>
+    <div class="bub" style="left:16%;bottom:44px;width:5px;height:5px;animation-delay:-1s"></div>
+    <div class="bub" style="left:58%;bottom:42px;width:7px;height:7px;animation-delay:-4.6s"></div>
+    <div class="bub" style="left:36%;bottom:46px;width:4px;height:4px;animation-delay:-8.2s"></div>
+    <div class="bub" style="left:76%;bottom:43px;width:5px;height:5px;animation-delay:-11s"></div>
+    <div class="hdr">수족관<span class="chev" id="chev">‹</span></div>
+    <div class="pods" id="pods"></div>
+    <div class="sand"></div>
+  </div></div>
+</div></div></div>
+
+<div class="tour" id="tour" hidden>
+  <div class="hole" id="hole"></div>
+  <div class="tip" id="tip">
+    <div class="step" id="tStep"></div><h3 id="tTitle"></h3><p id="tBody"></p>
+    <div class="extra" id="tExtra"></div>
+    <div class="tipnav"><span class="pg" id="tPg"></span>
+      <button class="nskip" id="tSkip">건너뛰기</button>
+      <button class="nprev" id="tPrev">이전</button>
+      <button class="nnext" id="tNext">다음</button></div>
+  </div>
+</div>
+<div class="autoflag" id="autoflag"><span>자동 재생 중</span><button id="autoStop">정지</button></div>
+
+<script src="assets/js/data.js"></script>
+<script src="assets/js/app.js"></script>
+</body>
+</html>
